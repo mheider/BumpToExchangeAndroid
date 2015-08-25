@@ -8,6 +8,7 @@ scalacOptions in Compile ++= Seq("-unchecked", "-deprecation", "-feature", "-enc
 
 libraryDependencies += "org.scaloid" %% "scaloid" % "4.0"
 libraryDependencies += "com.github.max-leuthaeuser" % "scroll_2.11" % "0.9.1"
+libraryDependencies += "de.hdrmrks.bte" % "bumptoexchange_2.11" % "0.1.1"
 
 
 proguardCache in Android ++= Seq("org.scaloid")
