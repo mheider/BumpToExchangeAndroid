@@ -1,8 +1,6 @@
-# Hello Scaloid for sbt
+# BumpToExchange - Android Implementation
 
-This is a template project that can be a starting point of a new [Scaloid](https://github.com/pocorall/scaloid) project.
-
-This contains minimum code as possible; therefore easy to run, examine and extend.
+This is the BumpToExchange Implementation for Android.
 
 Prerequisites
 -------------
