@@ -1,5 +1,7 @@
 package de.hdrmrks
 
+import java.util.concurrent.{LinkedBlockingQueue, TimeUnit, ThreadPoolExecutor}
+
 import org.scaloid.common._
 import android.graphics.Color
 import scroll.internal.Compartment
@@ -17,17 +19,17 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.widget.TextView
 
+import scala.collection.mutable
 import scala.collection.mutable.MutableList
+import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.duration.Duration
+import scala.util.Try
 
 class HelloScaloid extends SActivity {
 
   val TAG = "HelloScaloid"
-  val REQUEST_ENABLE_BT = 1
-
-  var btAdapter : BluetoothAdapter = null;
-
-  val btDeviceList:MutableList[BluetoothDevice] = MutableList();
-
+  implicit  val exec = ExecutionContext.fromExecutor(new ThreadPoolExecutor(100,100,1000,TimeUnit.SECONDS, new
+      LinkedBlockingQueue[Runnable]))
 
 
   class BaseGreeter {
@@ -40,67 +42,15 @@ class HelloScaloid extends SActivity {
 
   onCreate {
     Log.i(TAG, "Init play")
-
-    val filter = new IntentFilter(BluetoothDevice.ACTION_FOUND)
-    filter.addAction(BluetoothDevice.ACTION_UUID)
-    filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-    filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-
-    registerReceiver(ActionFoundReceiver, filter)
-
-    btAdapter = BluetoothAdapter.getDefaultAdapter()
-    checkBTState()
-
-  }
-
-  onDestroy {
-    if(btAdapter != null) {
-      btAdapter.cancelDiscovery()
-    }
-    unregisterReceiver(ActionFoundReceiver)
-  }
-
-
-  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-    super.onActivityResult(requestCode, resultCode, data)
-    if(requestCode == REQUEST_ENABLE_BT)
-      checkBTState()
-  }
-
-  private def checkBTState() {
-    if(btAdapter == null) {
-      Log.w(TAG, "Bluetooth NOT supported. ABORTING!")
-      return ;
-    }
-
-    if(btAdapter.isEnabled()) {
-      Log.i(TAG, "Bluetooth is enabled")
-      btAdapter.startDiscovery()
-    } else {
-      val enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-      startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-    }
-  }
-
-  val ActionFoundReceiver : BroadcastReceiver = new BroadcastReceiver() {
-
-    override def onReceive(context: Context, intent :Intent) {
-      val action = intent.getAction();
-      if(BluetoothDevice.ACTION_FOUND.equals(action)) {
-        val device: BluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-        Log.i(TAG, "\n  Device: " + device.getName() + ", " + device);
-        btDeviceList += device
-      } else {
-        if(BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-          Log.i(TAG, "\nDiscovery Started...");
-        } else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-          Log.i(TAG, "DiscoveryFinished")
-          for(device <- btDeviceList) {
-            Log.i(TAG, device.getName())
-          }
+    val devicesFuture = new BluetoothDiscoverer(getBaseContext).getBluetoothDevices
+    devicesFuture.onSuccess {
+      case result => {
+        for (elemt <- result) {
+          Log.i(TAG, elemt.toString)
         }
       }
     }
   }
-}
 
+
+}
