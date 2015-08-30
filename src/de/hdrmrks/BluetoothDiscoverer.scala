@@ -44,6 +44,7 @@ class BluetoothDiscoverer(context: Context) {
           Log.i(TAG, "\nDiscovery Started...");
         } else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
           doneDiscovery = true
+          Log.i(TAG, "Discovery finished")
         }
       }
     }

@@ -1,29 +1,12 @@
 package de.hdrmrks
 
-import java.util.concurrent.{LinkedBlockingQueue, TimeUnit, ThreadPoolExecutor}
+import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
-import org.scaloid.common._
-import android.graphics.Color
-import scroll.internal.Compartment
-import annotations.Role
-import android.util.Log
-import de.hdrmrks.bmp._
-
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.Bundle
-import android.os.Parcelable
-import android.widget.TextView
+import android.util.Log
+import org.scaloid.common._
 
-import scala.collection.mutable
-import scala.collection.mutable.MutableList
-import scala.concurrent.{Future, ExecutionContext}
-import scala.concurrent.duration.Duration
-import scala.util.Try
+import scala.concurrent.ExecutionContext
 
 class HelloScaloid extends SActivity {
 
@@ -48,9 +31,11 @@ class HelloScaloid extends SActivity {
         for (elemt <- result) {
           Log.i(TAG, elemt.toString)
         }
+
+        // send to the first device
+        val firstDevice : BluetoothDevice = result.head
+        new BluetoothConnection(firstDevice)
       }
     }
   }
-
-
 }
