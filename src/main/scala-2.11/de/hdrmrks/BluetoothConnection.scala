@@ -12,10 +12,9 @@ import android.util.Log
 class BluetoothConnection(device : BluetoothDevice) extends Thread{
 
   val TAG = "HelloScaloid"
-  val APP_UUID = UUID.fromString("47973232-d367-4d85-9fe2-2d9cc55e384b")
 
   Log.i(TAG, "Trying to connect to " + device.toString)
-  val mmSocket : BluetoothSocket = device.createRfcommSocketToServiceRecord(APP_UUID);
+  val mmSocket : BluetoothSocket = device.createRfcommSocketToServiceRecord(Constant.APP_UUID);
   Log.i(TAG, "Opened BluetoothRFCOMMONSocket " + mmSocket.toString)
 
   val connectionThread = new Thread(new Runnable {

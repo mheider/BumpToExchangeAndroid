@@ -57,6 +57,7 @@ class BluetoothDiscoverer(context: Context) {
     btAdapter.startDiscovery()
     while(!doneDiscovery) {} // wait
     doneDiscovery = false
+    context.unregisterReceiver(ActionFoundReceiver)
     return btDeviceList.toList
   }
 
