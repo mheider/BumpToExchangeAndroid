@@ -8,18 +8,23 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.hardware.SensorManager
 import android.util.Log
-import android.widget.TextView
+import android.view.View
+import android.view.View.OnClickListener
+import android.widget.{Button, TextView}
 import org.scaloid.common._
 import bump._
 
 import scala.concurrent.ExecutionContext
 
 class HelloScaloid extends SActivity with Observer {
-  var sender = true
+
+  // Default the device is receiving data
+  var sender = false
 
   var bumpDetector : BumpDetector = null
 
   var infoView: TextView = null
+  var bumpButton: Button = null
 
   val TAG = "HelloScaloid"
 
@@ -43,6 +48,13 @@ class HelloScaloid extends SActivity with Observer {
     Log.i(TAG, "Init play")
     setContentView(R.layout.hello_scaloid)
     infoView = findViewById(R.id.infoView).asInstanceOf[TextView]
+    bumpButton = findViewById(R.id.bumpButton).asInstanceOf[Button]
+    bumpButton.setOnClickListener(new OnClickListener {
+      override def onClick(v: View): Unit = {
+        Log.i(TAG, "bump button")
+        bump()
+      }
+    })
     bumpDetector = new BumpDetector(getSystemService(Context.SENSOR_SERVICE)
       .asInstanceOf[SensorManager])
     bumpDetector.addBumpObserver(this)
@@ -55,6 +67,10 @@ class HelloScaloid extends SActivity with Observer {
 
   override def update(observable: Observable, data: scala.Any): Unit = {
     Log.i(TAG, "BUMP")
+    bump()
+  }
+
+  private def bump(): Unit = {
     if (sender && !searching) {
       vibrator.vibrate(100)
       setInfoViewText("Searching...")
@@ -71,5 +87,6 @@ class HelloScaloid extends SActivity with Observer {
         }
       }
     }
+
   }
 }
