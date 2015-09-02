@@ -4,13 +4,13 @@ import java.util
 import java.util.{Observable, Observer}
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
-import android.bluetooth.BluetoothDevice
+import android.bluetooth.{BluetoothAdapter, BluetoothDevice}
 import android.content.Context
 import android.hardware.SensorManager
 import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
-import android.widget.{Button, TextView}
+import android.widget.{CheckBox, Button, TextView}
 import org.scaloid.common._
 import bump._
 
@@ -23,8 +23,12 @@ class HelloScaloid extends SActivity with Observer {
 
   var bumpDetector : BumpDetector = null
 
+  /*
+   * Connection to Android-Widgets
+   */
   var infoView: TextView = null
   var bumpButton: Button = null
+  var receiverCheckBox : CheckBox = null
 
   val TAG = "HelloScaloid"
 
@@ -55,6 +59,7 @@ class HelloScaloid extends SActivity with Observer {
         bump()
       }
     })
+    receiverCheckBox = findViewById(R.id.receiverCheckBox).asInstanceOf[CheckBox]
     bumpDetector = new BumpDetector(getSystemService(Context.SENSOR_SERVICE)
       .asInstanceOf[SensorManager])
     bumpDetector.addBumpObserver(this)
@@ -71,7 +76,7 @@ class HelloScaloid extends SActivity with Observer {
   }
 
   private def bump(): Unit = {
-    if (sender && !searching) {
+    if (!isReceiver && !searching) {
       vibrator.vibrate(100)
       setInfoViewText("Searching...")
       this.synchronized {
@@ -84,9 +89,17 @@ class HelloScaloid extends SActivity with Observer {
           this.synchronized {
             searching = false
           }
+          new BluetoothConnection(result)
         }
       }
     }
-
+    if (isReceiver) {
+      vibrator.vibrate(100)
+      setInfoViewText("Waiting for Sender")
+      new BluetoothReceiver(BluetoothAdapter.getDefaultAdapter)
+    }
   }
+
+  private def isReceiver() : Boolean = {return receiverCheckBox.isChecked}
+
 }

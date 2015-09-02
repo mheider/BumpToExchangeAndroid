@@ -9,9 +9,6 @@ import android.util.Log
 import scala.collection.mutable
 import scala.concurrent.{Future, ExecutionContext}
 
-/**
- * Created by markus on 27.08.15.
- */
 class BluetoothDiscoverer(context: Context) {
   val REQUEST_ENABLE_BT = 1
 

@@ -9,19 +9,31 @@ import android.util.Log
 /**
  * Created by markus on 30.08.15.
  */
-class BluetoothConnection(device : BluetoothDevice) extends Thread{
+class BluetoothConnection(devices : List[BluetoothDevice]) extends Thread{
 
   val TAG = "HelloScaloid"
 
-  Log.i(TAG, "Trying to connect to " + device.toString)
-  val mmSocket : BluetoothSocket = device.createRfcommSocketToServiceRecord(Constant.APP_UUID);
-  Log.i(TAG, "Opened BluetoothRFCOMMONSocket " + mmSocket.toString)
+  var mmSocket: BluetoothSocket = null
+
+  for (device <- devices) {
+    Log.i(TAG, "Trying to connect to " + device.toString)
+    try {
+      val tmp: BluetoothSocket = device.createRfcommSocketToServiceRecord(Constant.APP_UUID)
+      mmSocket = tmp
+      Log.i(TAG, "Opened BluetoothRFCOMMONSocket " + mmSocket.toString)
+    } catch {
+      case ioe: IOException => { Log.w(TAG, "could not connect") }
+    }
+  }
+  if (mmSocket == null)
+    throw new IOException("could not connect to the devices.")
+
+
 
   val connectionThread = new Thread(new Runnable {
     override def run(): Unit = {
       try {
         mmSocket.connect()
-
         Log.i(TAG, "bluetooth connected..");
       } catch {
         case ioe: IOException => {
