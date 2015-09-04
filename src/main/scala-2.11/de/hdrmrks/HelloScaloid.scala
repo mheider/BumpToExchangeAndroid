@@ -10,7 +10,8 @@ import android.hardware.SensorManager
 import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
-import android.widget.{CheckBox, Button, TextView}
+import android.widget.CompoundButton.OnCheckedChangeListener
+import android.widget.{CompoundButton, CheckBox, Button, TextView}
 import org.scaloid.common._
 import bump._
 
@@ -60,6 +61,19 @@ class HelloScaloid extends SActivity with Observer {
       }
     })
     receiverCheckBox = findViewById(R.id.receiverCheckBox).asInstanceOf[CheckBox]
+    receiverCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener {
+      override def onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean): Unit =  {
+        if(receiverCheckBox.isChecked) {
+          vibrator.vibrate(100)
+          setInfoViewText("Waiting for Sender")
+          val enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+          enableBtIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);
+          startActivityForResult(enableBtIntent, REQUEST_DEVICE_DISCOVERABLE);
+          val bluetoothReceiver = new BluetoothReceiver(BluetoothAdapter.getDefaultAdapter)
+          new Thread(bluetoothReceiver).start()
+        }
+      }
+    })
     bumpDetector = new BumpDetector(getSystemService(Context.SENSOR_SERVICE)
       .asInstanceOf[SensorManager])
     bumpDetector.addBumpObserver(this)
@@ -100,16 +114,6 @@ class HelloScaloid extends SActivity with Observer {
           new BluetoothSender(result)
         }
       }
-    }
-    if (isReceiver) {
-      vibrator.vibrate(100)
-      setInfoViewText("Waiting for Sender")
-      val enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-      enableBtIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);
-      startActivityForResult(enableBtIntent, REQUEST_DEVICE_DISCOVERABLE);
-      val bluetoothReceiver = new BluetoothReceiver(BluetoothAdapter.getDefaultAdapter)
-      bluetoothReceiver.addObserver(this)
-      new Thread(bluetoothReceiver).start()
     }
   }
 
