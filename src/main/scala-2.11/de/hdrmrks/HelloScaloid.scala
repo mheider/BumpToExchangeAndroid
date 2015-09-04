@@ -5,7 +5,7 @@ import java.util.{Observable, Observer}
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
 import android.bluetooth.{BluetoothAdapter, BluetoothDevice}
-import android.content.Context
+import android.content.{Intent, Context}
 import android.hardware.SensorManager
 import android.util.Log
 import android.view.View
@@ -71,9 +71,17 @@ class HelloScaloid extends SActivity with Observer {
   }
 
   override def update(observable: Observable, data: scala.Any): Unit = {
-    Log.i(TAG, "BUMP")
-    bump()
+    if (observable.isInstanceOf[BumpDetector]) {
+      Log.i(TAG, "BUMP")
+      bump()
+    }
+    else if (observable.isInstanceOf[BluetoothReceiver]) {
+      Log.i(TAG, "GOT DATA!!!")
+      toast(data.toString)
+    }
   }
+
+  val REQUEST_DEVICE_DISCOVERABLE: Int = 1
 
   private def bump(): Unit = {
     if (!isReceiver && !searching) {
@@ -89,14 +97,19 @@ class HelloScaloid extends SActivity with Observer {
           this.synchronized {
             searching = false
           }
-          new BluetoothConnection(result)
+          new BluetoothSender(result)
         }
       }
     }
     if (isReceiver) {
       vibrator.vibrate(100)
       setInfoViewText("Waiting for Sender")
-      new BluetoothReceiver(BluetoothAdapter.getDefaultAdapter)
+      val enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+      enableBtIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);
+      startActivityForResult(enableBtIntent, REQUEST_DEVICE_DISCOVERABLE);
+      val bluetoothReceiver = new BluetoothReceiver(BluetoothAdapter.getDefaultAdapter)
+      bluetoothReceiver.addObserver(this)
+      new Thread(bluetoothReceiver).start()
     }
   }
 

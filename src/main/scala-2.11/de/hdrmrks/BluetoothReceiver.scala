@@ -1,6 +1,7 @@
 package de.hdrmrks
 
 import java.io.IOException
+import java.util.Observable
 
 import android.bluetooth.{BluetoothSocket, BluetoothServerSocket, BluetoothAdapter}
 import android.content.Context
@@ -10,7 +11,7 @@ import android.util.Log
 /**
  * Created by markus on 30.08.15.
  */
-class BluetoothReceiver(bluetoothAdapter: BluetoothAdapter) extends Thread{
+class BluetoothReceiver(bluetoothAdapter: BluetoothAdapter) extends Observable with Runnable{
 
   val TAG = "HelloScaloid"
   var serverSocket: BluetoothServerSocket = null
@@ -24,7 +25,7 @@ class BluetoothReceiver(bluetoothAdapter: BluetoothAdapter) extends Thread{
 
   override def run(): Unit = {
     var clientSocket : BluetoothSocket = null
-    var run = false
+    var run = true
     while(run) {
       try {
         Log.i(TAG, "Waiting for client")
@@ -33,12 +34,13 @@ class BluetoothReceiver(bluetoothAdapter: BluetoothAdapter) extends Thread{
         case ioe: IOException => {run = false}
       }
       if (clientSocket != null) {
-        //manageSocket(clientSocket)
         Log.i(TAG, "created connection!")
         serverSocket.close()
         run = false
       }
     }
+    val bluetoothSocketConnection  = new BluetoothSocketConnection(clientSocket)
+    new Thread(bluetoothSocketConnection).start()
   }
 }
 
