@@ -16,14 +16,20 @@ class BluetoothSocketConnection(socket: BluetoothSocket) extends Observable with
 
   val TAG = "HelloScaloid"
   Log.i(TAG, "BluetoothSocketConnection created")
-  var inputStream: InputStream = null
-  var outputStream: OutputStream = null
+  var inputStream: ObjectInputStream = null
+  var outputStream: ObjectOutputStream = null
 
   try {
-    inputStream = socket.getInputStream
-    outputStream = socket.getOutputStream
+    Log.i(TAG, "Creating streams")
+    outputStream = new ObjectOutputStream(socket.getOutputStream)
+    outputStream.flush()
+    inputStream = new ObjectInputStream(socket.getInputStream)
+    Log.i(TAG, "streams created")
   } catch {
-    case ioe : IOException => {}
+    case ioe : IOException => {
+      Log.e(TAG, "Could not open input/output Stream")
+      Log.e(TAG, ioe.getMessage)
+    }
   }
 
   /**
@@ -36,8 +42,11 @@ class BluetoothSocketConnection(socket: BluetoothSocket) extends Observable with
     var run = true
     while(run) {
       try {
-        bytes = inputStream.read(buffer)
-        Log.i(TAG, new String(buffer, StandardCharsets.UTF_8))
+        val resource = inputStream.readObject().asInstanceOf[Resource]
+        Log.i(TAG, "Got a resource. Name = " + resource.name)
+        setChanged()
+        notifyObservers(resource)
+        run = false
       } catch {
         case ioe: IOException =>  {
           run = false
@@ -52,8 +61,7 @@ class BluetoothSocketConnection(socket: BluetoothSocket) extends Observable with
    */
   def send(res : Resource): Unit = {
     Log.i(TAG, "sending... " + res.toString)
-    while(outputStream == null) {} // wait
-    outputStream.write(res.data)
+    outputStream.writeObject(res)
   }
 
   /**

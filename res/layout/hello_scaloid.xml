@@ -15,20 +15,20 @@
                 android:text="Large Text"
                 android:id="@+id/infoView" android:layout_gravity="center"/>
     </LinearLayout>
-    <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Send"
-            android:id="@+id/sendButton" android:layout_weight="0.20"/>
-    <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BUMP!"
-            android:id="@+id/bumpButton" android:layout_gravity="center_horizontal" android:layout_weight="0.20"/>
     <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="receiver"
-            android:id="@+id/receiverCheckBox" android:layout_weight="0.20" android:checked="false"/>
+            android:id="@+id/receiverCheckBox" android:layout_weight="0.10" android:checked="false"/>
+    <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="selectResource"
+            android:id="@+id/selectResourceButton" android:layout_weight="0.06"/>
+    <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="190dp"
+            android:layout_height="wrap_content"
+            android:text="BUMP!"
+            android:id="@+id/bumpButton" android:layout_gravity="center_horizontal" android:layout_weight="0.10"/>
 </LinearLayout>

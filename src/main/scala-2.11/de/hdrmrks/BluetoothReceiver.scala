@@ -1,7 +1,7 @@
 package de.hdrmrks
 
 import java.io.IOException
-import java.util.Observable
+import java.util.{Observer, Observable}
 
 import android.bluetooth.{BluetoothSocket, BluetoothServerSocket, BluetoothAdapter}
 import android.content.Context
@@ -11,7 +11,7 @@ import android.util.Log
 /**
  * Created by markus on 30.08.15.
  */
-class BluetoothReceiver(bluetoothAdapter: BluetoothAdapter) extends Observable with Runnable{
+class BluetoothReceiver(bluetoothAdapter: BluetoothAdapter) extends Observable with Runnable with Observer {
 
   val TAG = "HelloScaloid"
   var serverSocket: BluetoothServerSocket = null
@@ -40,7 +40,15 @@ class BluetoothReceiver(bluetoothAdapter: BluetoothAdapter) extends Observable w
       }
     }
     val bluetoothSocketConnection  = new BluetoothSocketConnection(clientSocket)
+    bluetoothSocketConnection.addObserver(this)
     new Thread(bluetoothSocketConnection).start()
+  }
+
+  override def update(observable: Observable, data: scala.Any): Unit = {
+    if (observable.isInstanceOf[BluetoothSocketConnection]) {
+      setChanged()
+      notifyObservers(data)
+    }
   }
 }
 
