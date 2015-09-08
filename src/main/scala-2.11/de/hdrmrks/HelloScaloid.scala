@@ -193,7 +193,7 @@ class HelloScaloid extends SActivity with Observer {
 
   private def openFileWithIntent(file: File): Unit = {
     val intent = new Intent(Intent.ACTION_VIEW)
-    intent.setDataAndType(Uri.fromFile(file), "txt/plain")
+    intent.setDataAndType(Uri.fromFile(file), "text/plain")
     startActivity(intent)
   }
 }
